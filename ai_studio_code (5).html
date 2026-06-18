@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHẬP XUẤT HÀNG HÓA</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 50px;
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: center;
+            background: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 10px;
+            z-index: 100;
+            overflow-x: auto;
+        }
+
+        nav button {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--secondary-color);
+            border-radius: 8px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        nav button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        nav button:hover:not(.active) {
+            background-color: #f1f5f9;
+        }
+
+        /* Form & Cards */
+        .card {
+            background: var(--card-background);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .grid-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        input, select, textarea {
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        input[readonly] {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:active { opacity: 0.8; }
+        .btn-primary { background: var(--primary-color); color: white; }
+        .btn-success { background: var(--success-color); color: white; }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .btn-warning { background: var(--warning-color); color: white; }
+        .btn-secondary { background: var(--secondary-color); color: white; }
+
+        /* Table Style */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            min-width: 800px;
+        }
+
+        th {
+            background-color: #f8fafc;
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--secondary-color);
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-stock { background: #dcfce7; color: #166534; }
+        .badge-sold { background: #fee2e2; color: #991b1b; }
+
+        .text-profit { color: var(--success-color); font-weight: bold; }
+        .text-loss { color: var(--danger-color); font-weight: bold; }
+
+        /* Tooltip & Filters */
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-card h3 {
+            font-size: 13px;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 600px) {
+            .grid-form { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; }
+            header h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Nhập Xuất Hàng Hóa</h1>
+</header>
+
+<div class="container">
+    <!-- Menu Navigation -->
+    <nav>
+        <button class="active" onclick="switchTab('nhap-hang')">📥 Nhập hàng</button>
+        <button onclick="switchTab('ton-kho')">📦 Tồn kho</button>
+        <button onclick="switchTab('da-xuất')">📤 Đã xuất</button>
+        <button onclick="switchTab('bao-cao')">📊 Báo cáo</button>
+        <button onclick="switchTab('cai-dat')">⚙️ Sao lưu</button>
+    </nav>
+
+    <!-- Tab 1: Nhập hàng -->
+    <div id="tab-nhap-hang" class="tab-content">
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">Phiếu nhập hàng mới</h2>
+            <form id="form-nhap-hang">
+                <div class="grid-form">
+                    <div class="form-group">
+                        <label>Ngày nhập</label>
+                        <input type="date" id="nhap-ngay" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Mã sản phẩm (Tự động)</label>
+                        <input type="text" id="nhap-ma" readonly placeholder="YYMMvSTT">
+                    </div>
+                    <div class="form-group">
+                        <label>Nơi mua</label>
+                        <input type="text" id="nhap-noimua" placeholder="Tên cửa hàng/người bán">
+                    </div>
+                    <div class="form-group">
+                        <label>Kích thước</label>
+                        <select id="nhap-kichtuoc" onchange="toggleCustomSize(this, 'nhap-kichtuoc-khac-wrap')">
+                            <option value="1m2">1m2</option>
+                            <option value="1m5">1m5</option>
+                            <option value="1m6">1m6</option>
+                            <option value="1m8">1m8</option>
+                            <option value="2m">2m</option>
+                            <option value="2m2">2m2</option>
+                            <option value="Khác">Khác...</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="nhap-kichtuoc-khac-wrap" style="display:none;">
+                        <label>Kích thước khác</label>
+                        <input type="text" id="nhap-kichtuoc-khac" placeholder="Ví dụ: 3m x 4m">
+                    </div>
+                    <div class="form-group">
+                        <label>Độ dày</label>
+                        <select id="nhap-doday">
+                            <option value="5cm">5cm</option>
+                            <option value="7cm">7cm</option>
+                            <option value="10cm">10cm</option>
+                            <option value="15cm">15cm</option>
+                            <option value="20cm">20cm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tổng tiền mua (VNĐ)</label>
+                        <input type="text" id="nhap-tien" placeholder="0" onkeyup="formatInputCurrency(this)">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Ghi chú</label>
+                        <textarea id="nhap-ghichu" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">➕ Thêm hàng</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetImportForm()">🔄 Làm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tab 2: Tồn kho -->
+    <div id="tab-ton-kho" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3>Bộ lọc & Tìm kiếm</h3>
+            <div class="filters">
+                <div class="form-group">
+                    <label>Tìm mã/nơi mua</label>
+                    <input type="text" id="search-ton" placeholder="Nhập từ khóa..." oninput="renderInventory()">
+                </div>
+                <div class="form-group">
+                    <label>Tháng nhập</label>
+                    <input type="month" id="filter-thang-nhap" onchange="renderInventory()">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-secondary" onclick="clearFilters('ton-kho')">Xóa lọc</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="table-ton-kho">
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Ngày nhập</th>
+                            <th>Nơi mua</th>
+                            <th>Kích thước</th>
+                            <th>Độ dày</th>
+                            <th>Giá mua</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Đã xuất -->
+    <div id="tab-da-xuất" class="tab-content" style="display:none;">
+        <div class="card">
+            <h3>Danh sách đã bán</h3>
+            <div class="filters">
+                <div class="form-group">
+                    <label>Tìm mã/người mua</label>
+                    <input type="text" id="search-xuat" placeholder="Nhập từ khóa..." oninput="renderExported()">
+                </div>
+                <div class="form-group">
+                    <label>Tháng bán</label>
+                    <input type="month" id="filter-thang-xuat" onchange="renderExported()">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-secondary" onclick="clearFilters('da-xuat')">Xóa lọc</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Giá mua</th>
+                            <th>Ngày bán</th>
+                            <th>Giá bán</th>
+                            <th>Người mua</th>
+                            <th>Lãi/Lỗ</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-da-xuat-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Báo cáo -->
+    <div id="tab-bao-cao" class="tab-content" style="display:none;">
+        <div class="filters card">
+            <div class="form-group">
+                <label>Xem báo cáo tháng</label>
+                <input type="month" id="report-month-select" onchange="renderReport()">
+            </div>
+        </div>
+
+        <div class="stats-grid" id="report-stats">
+            <!-- Stats cards dynamic -->
+        </div>
+
+        <div class="grid-form">
+            <div class="card">
+                <h3>Số lượng Nhập/Xuất</h3>
+                <div class="chart-container">
+                    <canvas id="chartCount"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Lợi nhuận theo tháng</h3>
+                <div class="chart-container">
+                    <canvas id="chartProfit"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 5: Cài đặt / Sao lưu -->
+    <div id="tab-cai-dat" class="tab-content" style="display:none;">
+        <div class="card">
+            <h2>Quản lý dữ liệu</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">Tất cả dữ liệu được lưu tại trình duyệt này (LocalStorage). Hãy thường xuyên xuất file để sao lưu.</p>
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="exportData()">📤 Xuất file JSON (Backup)</button>
+                <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">📥 Nhập file JSON (Restore)</button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa/Xem -->
+<div id="modal-edit" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modal-title">Chỉnh sửa thông tin</h2>
+            <button class="close-modal" onclick="closeModal('modal-edit')">&times;</button>
+        </div>
+        <form id="form-edit">
+            <input type="hidden" id="edit-id">
+            <div class="grid-form">
+                <div class="form-group">
+                    <label>Mã sản phẩm</label>
+                    <input type="text" id="edit-ma" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Ngày nhập</label>
+                    <input type="date" id="edit-ngay-nhap">
+                </div>
+                <div class="form-group">
+                    <label>Nơi mua</label>
+                    <input type="text" id="edit-noimua">
+                </div>
+                <div class="form-group">
+                    <label>Kích thước</label>
+                    <input type="text" id="edit-kichtuoc">
+                </div>
+                <div class="form-group">
+                    <label>Độ dày</label>
+                    <input type="text" id="edit-doday">
+                </div>
+                <div class="form-group">
+                    <label>Giá mua</label>
+                    <input type="text" id="edit-gia-nhap" onkeyup="formatInputCurrency(this)">
+                </div>
+                
+                <!-- Phần thông tin bán (chỉ hiện nếu đã xuất) -->
+                <div id="edit-sold-info" style="grid-column: 1 / -1; display:none; border-top: 1px dashed #ccc; padding-top: 15px; margin-top: 10px;">
+                    <h3 style="margin-bottom:10px;">Thông tin bán hàng</h3>
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label>Ngày bán</label>
+                            <input type="date" id="edit-ngay-ban">
+                        </div>
+                        <div class="form-group">
+                            <label>Giá bán</label>
+                            <input type="text" id="edit-gia-ban" onkeyup="formatInputCurrency(this)">
+                        </div>
+                        <div class="form-group">
+                            <label>Người mua</label>
+                            <input type="text" id="edit-nguoimua">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Ghi chú</label>
+                    <textarea id="edit-ghichu" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit')">Đóng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Xuất Hàng -->
+<div id="modal-xuat" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-header">
+            <h2>Xuất hàng: <span id="xuat-ma-hien-thi"></span></h2>
+            <button class="close-modal" onclick="closeModal('modal-xuat')">&times;</button>
+        </div>
+        <form id="form-xuat-hang">
+            <input type="hidden" id="xuat-id">
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Ngày bán</label>
+                <input type="date" id="xuat-ngay" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Giá bán (VNĐ)</label>
+                <input type="text" id="xuat-gia" required placeholder="0" onkeyup="formatInputCurrency(this)">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Người mua</label>
+                <input type="text" id="xuat-nguoimua" placeholder="Tên khách hàng">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label>Ghi chú bán hàng</label>
+                <textarea id="xuat-ghichu" rows="2"></textarea>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-success" style="width: 100%;">Xác nhận xuất hàng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    /**
+     * CORE STATE
+     */
+    let items = JSON.parse(localStorage.getItem('inventory_data')) || [];
+    let chartCountInstance = null;
+    let chartProfitInstance = null;
+
+    // Khởi tạo ngày mặc định khi load trang
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('nhap-ngay').value = today;
+        document.getElementById('report-month-select').value = today.substring(0, 7);
+        
+        generateCode(); // Sinh mã ngay khi load
+        renderAll();
+    });
+
+    // Tự động sinh mã khi thay đổi ngày nhập
+    document.getElementById('nhap-ngay').addEventListener('change', generateCode);
+
+    /**
+     * HÀM TIỆN ÍCH
+     */
+    function saveData() {
+        localStorage.setItem('inventory_data', JSON.stringify(items));
+    }
+
+    function formatCurrency(num) {
+        if (!num) return "0";
+        return new Intl.NumberFormat('vi-VN').format(num);
+    }
+
+    function parseCurrency(str) {
+        if (!str) return 0;
+        return parseInt(str.toString().replace(/\D/g, '')) || 0;
+    }
+
+    function formatInputCurrency(input) {
+        let value = input.value.replace(/\D/g, '');
+        input.value = formatCurrency(value);
+    }
+
+    function toggleCustomSize(select, targetId) {
+        document.getElementById(targetId).style.display = (select.value === 'Khác') ? 'flex' : 'none';
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById('tab-' + tabName).style.display = 'block';
+        event.currentTarget.classList.add('active');
+
+        // Refresh data dựa trên tab
+        if (tabName === 'ton-kho') renderInventory();
+        if (tabName === 'da-xuất') renderExported();
+        if (tabName === 'bao-cao') renderReport();
+    }
+
+    function openModal(id) {
+        document.getElementById(id).style.display = 'flex';
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+    }
+
+    function generateCode() {
+        const dateVal = document.getElementById('nhap-ngay').value;
+        if (!dateVal) return;
+
+        const date = new Date(dateVal);
+        const YY = date.getFullYear().toString().slice(-2);
+        const MM = (date.getMonth() + 1).toString().padStart(2, '0');
+        const prefix = `${YY}${MM}v`;
+
+        // Lọc các sp cùng tháng để tìm STT lớn nhất
+        const sameMonthItems = items.filter(item => item.code.startsWith(prefix));
+        let maxSTT = 0;
+        sameMonthItems.forEach(item => {
+            const stt = parseInt(item.code.replace(prefix, ''));
+            if (stt > maxSTT) maxSTT = stt;
+        });
+
+        document.getElementById('nhap-ma').value = `${prefix}${maxSTT + 1}`;
+    }
+
+    /**
+     * XỬ LÝ NGHIỆP VỤ - NHẬP HÀNG
+     */
+    document.getElementById('form-nhap-hang').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const sizeSelect = document.getElementById('nhap-kichtuoc').value;
+        const finalSize = sizeSelect === 'Khác' ? document.getElementById('nhap-kichtuoc-khac').value : sizeSelect;
+
+        const newItem = {
+            id: Date.now(),
+            dateIn: document.getElementById('nhap-ngay').value,
+            code: document.getElementById('nhap-ma').value,
+            source: document.getElementById('nhap-noimua').value,
+            size: finalSize,
+            thickness: document.getElementById('nhap-doday').value,
+            priceIn: parseCurrency(document.getElementById('nhap-tien').value),
+            note: document.getElementById('nhap-ghichu').value,
+            status: 'ton-kho',
+            // Thông tin bán mặc định trống
+            dateOut: '',
+            priceOut: 0,
+            buyer: '',
+            noteOut: ''
+        };
+
+        items.push(newItem);
+        saveData();
+        alert('Đã nhập hàng thành công!');
+        resetImportForm();
+        switchTab('ton-kho');
+    };
+
+    function resetImportForm() {
+        document.getElementById('form-nhap-hang').reset();
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('nhap-ngay').value = today;
+        document.getElementById('nhap-kichtuoc-khac-wrap').style.display = 'none';
+        generateCode();
+    }
+
+    /**
+     * XỬ LÝ NGHIỆP VỤ - TỒN KHO
+     */
+    function renderInventory() {
+        const tbody = document.querySelector('#table-ton-kho tbody');
+        const search = document.getElementById('search-ton').value.toLowerCase();
+        const filterMonth = document.getElementById('filter-thang-nhap').value; // YYYY-MM
+
+        tbody.innerHTML = '';
+        
+        const filtered = items.filter(item => {
+            const matchStatus = item.status === 'ton-kho';
+            const matchSearch = item.code.toLowerCase().includes(search) || item.source.toLowerCase().includes(search);
+            const matchMonth = filterMonth ? item.dateIn.startsWith(filterMonth) : true;
+            return matchStatus && matchSearch && matchMonth;
+        });
+
+        filtered.sort((a,b) => new Date(b.dateIn) - new Date(a.dateIn)).forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${item.code}</strong></td>
+                    <td>${item.dateIn.split('-').reverse().join('/')}</td>
+                    <td>${item.source}</td>
+                    <td>${item.size}</td>
+                    <td>${item.thickness}</td>
+                    <td>${formatCurrency(item.priceIn)}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-warning" onclick="openEditModal(${item.id})" title="Sửa">✏️</button>
+                            <button class="btn btn-success" onclick="openExportModal(${item.id})" title="Xuất">📤</button>
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id})" title="Xóa">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    /**
+     * XỬ LÝ NGHIỆP VỤ - XUẤT HÀNG
+     */
+    function openExportModal(id) {
+        const item = items.find(i => i.id === id);
+        document.getElementById('xuat-id').value = item.id;
+        document.getElementById('xuat-ma-hien-thi').innerText = item.code;
+        document.getElementById('xuat-ngay').value = new Date().toISOString().split('T')[0];
+        document.getElementById('xuat-gia').value = '';
+        document.getElementById('xuat-nguoimua').value = '';
+        document.getElementById('xuat-ghichu').value = '';
+        openModal('modal-xuat');
+    }
+
+    document.getElementById('form-xuat-hang').onsubmit = function(e) {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('xuat-id').value);
+        const index = items.findIndex(i => i.id === id);
+
+        if (index !== -1) {
+            items[index].status = 'da-xuất';
+            items[index].dateOut = document.getElementById('xuat-ngay').value;
+            items[index].priceOut = parseCurrency(document.getElementById('xuat-gia').value);
+            items[index].buyer = document.getElementById('xuat-nguoimua').value;
+            items[index].noteOut = document.getElementById('xuat-ghichu').value;
+            
+            saveData();
+            closeModal('modal-xuat');
+            alert('Xuất hàng thành công!');
+            switchTab('da-xuất');
+        }
+    };
+
+    /**
+     * XỬ LÝ NGHIỆP VỤ - ĐÃ XUẤT
+     */
+    function renderExported() {
+        const tbody = document.getElementById('table-da-xuat-body');
+        const search = document.getElementById('search-xuat').value.toLowerCase();
+        const filterMonth = document.getElementById('filter-thang-xuat').value;
+
+        tbody.innerHTML = '';
+        
+        const filtered = items.filter(item => {
+            const matchStatus = item.status === 'da-xuất';
+            const matchSearch = item.code.toLowerCase().includes(search) || item.buyer.toLowerCase().includes(search);
+            const matchMonth = filterMonth ? item.dateOut.startsWith(filterMonth) : true;
+            return matchStatus && matchSearch && matchMonth;
+        });
+
+        filtered.sort((a,b) => new Date(b.dateOut) - new Date(a.dateOut)).forEach(item => {
+            const profit = item.priceOut - item.priceIn;
+            const profitClass = profit >= 0 ? 'text-profit' : 'text-loss';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${item.code}</strong></td>
+                    <td>${formatCurrency(item.priceIn)}</td>
+                    <td>${item.dateOut.split('-').reverse().join('/')}</td>
+                    <td>${formatCurrency(item.priceOut)}</td>
+                    <td>${item.buyer}</td>
+                    <td class="${profitClass}">${formatCurrency(profit)}</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-warning" onclick="openEditModal(${item.id})" title="Sửa">✏️</button>
+                            <button class="btn btn-secondary" onclick="undoExport(${item.id})" title="Hoàn tác">↩️</button>
+                            <button class="btn btn-danger" onclick="deleteItem(${item.id})" title="Xóa">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function undoExport(id) {
+        if(confirm('Bạn có muốn hoàn tác việc xuất hàng này? Sản phẩm sẽ quay lại kho.')) {
+            const index = items.findIndex(i => i.id === id);
+            items[index].status = 'ton-kho';
+            items[index].dateOut = '';
+            items[index].priceOut = 0;
+            items[index].buyer = '';
+            saveData();
+            renderExported();
+        }
+    }
+
+    /**
+     * CHỈNH SỬA & XÓA CHUNG
+     */
+    function openEditModal(id) {
+        const item = items.find(i => i.id === id);
+        document.getElementById('edit-id').value = item.id;
+        document.getElementById('edit-ma').value = item.code;
+        document.getElementById('edit-ngay-nhap').value = item.dateIn;
+        document.getElementById('edit-noimua').value = item.source;
+        document.getElementById('edit-kichtuoc').value = item.size;
+        document.getElementById('edit-doday').value = item.thickness;
+        document.getElementById('edit-gia-nhap').value = formatCurrency(item.priceIn);
+        document.getElementById('edit-ghichu').value = item.note || '';
+
+        // Hiển thị phần thông tin bán nếu là hàng đã xuất
+        const soldInfo = document.getElementById('edit-sold-info');
+        if (item.status === 'da-xuất') {
+            soldInfo.style.display = 'block';
+            document.getElementById('edit-ngay-ban').value = item.dateOut;
+            document.getElementById('edit-gia-ban').value = formatCurrency(item.priceOut);
+            document.getElementById('edit-nguoimua').value = item.buyer;
+        } else {
+            soldInfo.style.display = 'none';
+        }
+
+        openModal('modal-edit');
+    }
+
+    document.getElementById('form-edit').onsubmit = function(e) {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('edit-id').value);
+        const index = items.findIndex(i => i.id === id);
+
+        if (index !== -1) {
+            items[index].dateIn = document.getElementById('edit-ngay-nhap').value;
+            items[index].source = document.getElementById('edit-noimua').value;
+            items[index].size = document.getElementById('edit-kichtuoc').value;
+            items[index].thickness = document.getElementById('edit-doday').value;
+            items[index].priceIn = parseCurrency(document.getElementById('edit-gia-nhap').value);
+            items[index].note = document.getElementById('edit-ghichu').value;
+
+            if (items[index].status === 'da-xuất') {
+                items[index].dateOut = document.getElementById('edit-ngay-ban').value;
+                items[index].priceOut = parseCurrency(document.getElementById('edit-gia-ban').value);
+                items[index].buyer = document.getElementById('edit-nguoimua').value;
+            }
+
+            saveData();
+            closeModal('modal-edit');
+            alert('Cập nhật thành công!');
+            renderInventory();
+            renderExported();
+        }
+    };
+
+    function deleteItem(id) {
+        if (confirm('Bạn chắc chắn muốn xóa vĩnh viễn sản phẩm này?')) {
+            items = items.filter(i => i.id !== id);
+            saveData();
+            renderInventory();
+            renderExported();
+        }
+    }
+
+    function clearFilters(type) {
+        if(type === 'ton-kho') {
+            document.getElementById('search-ton').value = '';
+            document.getElementById('filter-thang-nhap').value = '';
+            renderInventory();
+        } else {
+            document.getElementById('search-xuat').value = '';
+            document.getElementById('filter-thang-xuat').value = '';
+            renderExported();
+        }
+    }
+
+    /**
+     * BÁO CÁO & BIỂU ĐỒ
+     */
+    function renderReport() {
+        const targetMonth = document.getElementById('report-month-select').value; // YYYY-MM
+        const monthItems = items.filter(i => i.dateIn.startsWith(targetMonth) || (i.dateOut && i.dateOut.startsWith(targetMonth)));
+
+        // Tính toán thống kê
+        const nhapSl = items.filter(i => i.dateIn.startsWith(targetMonth)).length;
+        const nhapGiaTri = items.filter(i => i.dateIn.startsWith(targetMonth)).reduce((sum, i) => sum + i.priceIn, 0);
+        
+        const xuatItems = items.filter(i => i.status === 'da-xuất' && i.dateOut.startsWith(targetMonth));
+        const xuatSl = xuatItems.length;
+        const xuatDoanhThu = xuatItems.reduce((sum, i) => sum + i.priceOut, 0);
+        const loiNhuan = xuatItems.reduce((sum, i) => sum + (i.priceOut - i.priceIn), 0);
+
+        const tonSl = items.filter(i => i.status === 'ton-kho').length;
+        const tonGiaTri = items.filter(i => i.status === 'ton-kho').reduce((sum, i) => sum + i.priceIn, 0);
+
+        const statsHtml = `
+            <div class="stat-card">
+                <h3>📦 Nhập hàng (${targetMonth})</h3>
+                <div class="value">${nhapSl} SP</div>
+                <div style="font-size: 13px; color: #666;">${formatCurrency(nhapGiaTri)} đ</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--success-color)">
+                <h3>📤 Xuất hàng (${targetMonth})</h3>
+                <div class="value">${xuatSl} SP</div>
+                <div style="font-size: 13px; color: #666;">${formatCurrency(xuatDoanhThu)} đ</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--warning-color)">
+                <h3>💵 Lợi nhuận (${targetMonth})</h3>
+                <div class="value ${loiNhuan >= 0 ? 'text-profit' : 'text-loss'}">${formatCurrency(loiNhuan)} đ</div>
+            </div>
+            <div class="stat-card" style="border-left-color: var(--secondary-color)">
+                <h3>🏠 Tồn kho hiện tại</h3>
+                <div class="value">${tonSl} SP</div>
+                <div style="font-size: 13px; color: #666;">${formatCurrency(tonGiaTri)} đ</div>
+            </div>
+        `;
+        document.getElementById('report-stats').innerHTML = statsHtml;
+
+        renderCharts();
+    }
+
+    function renderCharts() {
+        // Lấy dữ liệu 6 tháng gần nhất
+        const last6Months = [];
+        for (let i = 5; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            last6Months.push(d.toISOString().substring(0, 7));
+        }
+
+        const nhapData = last6Months.map(m => items.filter(item => item.dateIn.startsWith(m)).length);
+        const xuatData = last6Months.map(m => items.filter(item => item.status === 'da-xuất' && item.dateOut.startsWith(m)).length);
+        const profitData = last6Months.map(m => {
+            return items.filter(item => item.status === 'da-xuất' && item.dateOut.startsWith(m))
+                        .reduce((sum, item) => sum + (item.priceOut - item.priceIn), 0);
+        });
+
+        // Hủy chart cũ nếu có
+        if (chartCountInstance) chartCountInstance.destroy();
+        if (chartProfitInstance) chartProfitInstance.destroy();
+
+        // Biểu đồ số lượng
+        const ctxCount = document.getElementById('chartCount').getContext('2d');
+        chartCountInstance = new Chart(ctxCount, {
+            type: 'bar',
+            data: {
+                labels: last6Months,
+                datasets: [
+                    { label: 'Nhập', data: nhapData, backgroundColor: '#2563eb' },
+                    { label: 'Xuất', data: xuatData, backgroundColor: '#22c55e' }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // Biểu đồ lợi nhuận
+        const ctxProfit = document.getElementById('chartProfit').getContext('2d');
+        chartProfitInstance = new Chart(ctxProfit, {
+            type: 'line',
+            data: {
+                labels: last6Months,
+                datasets: [{
+                    label: 'Lợi nhuận (VNĐ)',
+                    data: profitData,
+                    borderColor: '#f59e0b',
+                    tension: 0.1,
+                    fill: false
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    /**
+     * SAO LƯU DỮ LIỆU
+     */
+    function exportData() {
+        const dataStr = JSON.stringify(items, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        const exportFileDefaultName = 'quan-ly-hang-hoa-' + new Date().toISOString().slice(0,10) + '.json';
+
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+    }
+
+    function importData(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    if(confirm('Bạn có chắc chắn muốn ghi đè dữ liệu hiện tại bằng file này?')) {
+                        items = importedData;
+                        saveData();
+                        location.reload();
+                    }
+                } else {
+                    alert('File không hợp lệ!');
+                }
+            } catch (err) {
+                alert('Lỗi khi đọc file!');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function renderAll() {
+        renderInventory();
+        renderExported();
+        renderReport();
+    }
+</script>
+
+</body>
+</html>
